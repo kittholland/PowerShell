@@ -3,6 +3,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 --********************************************************************/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Reflection;
@@ -26,6 +27,25 @@ namespace Microsoft.PowerShell.Commands
         [AllowEmptyString]
         public string InputObject { get; set; }
 
+
+        /// <summary>
+        /// gets or sets the As property
+        /// </summary>
+        private string asValue = "PSCustomObject";
+
+        [Parameter(Position = 1)]
+        [ValidateSet("PSCustomObject", "Hashtable")]
+        public string As
+        {
+            get
+            {
+                return asValue;
+            }
+            set
+            {
+                asValue = value;
+            }
+        }
         /// <summary>
         /// inputObjectBuffer buffers all InputObjet contents available in the pipeline.
         /// </summary>
@@ -113,7 +133,7 @@ namespace Microsoft.PowerShell.Commands
         /// </summary>
         /// <param name="input">Input String.</param>
         /// <returns>True if successfully converted, else returns false.</returns>
-        private bool ConvertFromJsonHelper(string input)
+        private bool ConvertFromJsonHelper(string input, string As)
         {
             ErrorRecord error = null;
             object result = JsonObject.ConvertFromJson(input, out error);
@@ -123,7 +143,16 @@ namespace Microsoft.PowerShell.Commands
                 ThrowTerminatingError(error);
             }
 
-            WriteObject(result);
+            switch(As)
+            {
+                case "PSCustomObject":
+                    object resultPSCustomObject = result;//Convert hashtable result to pscustomobject
+                    WriteObject(resultPSCustomObject);
+                    break;
+                case "Hashtable":
+                    WriteObject(result);
+                    break;
+            }
             return (result != null);
         }
 
