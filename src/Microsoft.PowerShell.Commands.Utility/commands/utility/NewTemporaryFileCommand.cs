@@ -27,7 +27,7 @@ namespace Microsoft.PowerShell.Commands
                 }
                 catch (Exception e)
                 {
-                    WriteError(
+                    ThrowTerminatingError(
                         new ErrorRecord(
                             e,
                             "NewTemporaryFileWriteError",
